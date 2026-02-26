@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข่าวสารล่าสุด</title>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f4f4; margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; }
+        .news-card { background: white; border-radius: 10px; margin-bottom: 15px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .news-img { width: 100%; height: 200px; object-fit: cover; }
+        .news-content { padding: 15px; }
+        .news-title { margin: 0 0 10px; font-size: 18px; color: #333; }
+        .news-summary { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        .read-more { display: inline-block; background-color: #00c300; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: center; color: #333;">📰 อัปเดตข่าวสาร</h2>
+        <div id="news-list">กำลังโหลดข้อมูล...</div>
+    </div>
+
+    <script>
+        // *** นำ SHEET_ID ของคุณมาใส่ตรงนี้ ***
+        const sheetId = 'ใส่_SHEET_ID_ของคุณตรงนี้'; 
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+        fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                // แปลงข้อมูลที่ได้จาก Google Sheets ให้อยู่ในรูปแบบ JSON
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+                let html = '';
+
+                // วนลูปสร้างการ์ดข่าว (ข้ามแถวแรกที่เป็นหัวข้อ)
+                rows.forEach((row, index) => {
+                    if (index === 0 || !row.c[0]) return; 
+                    
+                    const id = row.c[0].v;
+                    const title = row.c[1] ? row.c[1].v : 'ไม่มีหัวข้อ';
+                    const imgUrl = row.c[2] ? row.c[2].v : 'https://via.placeholder.com/600x300?text=No+Image';
+                    const summary = row.c[3] ? row.c[3].v : '';
+
+                    html += `
+                        <div class="news-card">
+                            <img src="${imgUrl}" alt="news image" class="news-img">
+                            <div class="news-content">
+                                <h3 class="news-title">${title}</h3>
+                                <p class="news-summary">${summary}</p>
+                                <a href="article.html?id=${id}" class="read-more">อ่านเพิ่มเติม</a>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('news-list').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('news-list').innerHTML = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+                console.error(err);
+            });
+    </script>
+</body>
+</html>

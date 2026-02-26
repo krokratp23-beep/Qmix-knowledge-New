@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดข่าว</title>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #fff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .back-btn { display: inline-block; color: #00c300; text-decoration: none; font-weight: bold; margin-bottom: 20px; }
+        .article-img { width: 100%; border-radius: 10px; margin-bottom: 20px; }
+        .article-title { font-size: 22px; color: #333; margin-bottom: 10px; }
+        .article-body { font-size: 16px; color: #444; line-height: 1.6; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← กลับหน้ารวมข่าว</a>
+        <div id="article-content">กำลังโหลดเนื้อหา...</div>
+    </div>
+
+    <script>
+        // *** นำ SHEET_ID ของคุณมาใส่ตรงนี้ (ต้องตรงกับไฟล์ index) ***
+        const sheetId = 'ใส่_SHEET_ID_ของคุณตรงนี้'; 
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+        // ดึง ID ข่าวจาก URL (เช่น article.html?id=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const articleId = urlParams.get('id');
+
+        fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const json = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+                let found = false;
+
+                // ค้นหาข่าวที่มี ID ตรงกับที่กดเข้ามา
+                rows.forEach((row, index) => {
+                    if (index === 0 || !row.c[0]) return;
+                    
+                    if (row.c[0].v.toString() === articleId) {
+                        found = true;
+                        const title = row.c[1] ? row.c[1].v : '';
+                        const imgUrl = row.c[2] ? row.c[2].v : '';
+                        const content = row.c[4] ? row.c[4].v : 'ไม่มีเนื้อหา';
+
+                        document.getElementById('article-content').innerHTML = `
+                            ${imgUrl ? `<img src="${imgUrl}" class="article-img">` : ''}
+                            <h1 class="article-title">${title}</h1>
+                            <div class="article-body">${content}</div>
+                        `;
+                    }
+                });
+
+                if (!found) {
+                    document.getElementById('article-content').innerHTML = 'ไม่พบเนื้อหาข่าวที่คุณค้นหา';
+                }
+            });
+    </script>
+</body>
+</html>
