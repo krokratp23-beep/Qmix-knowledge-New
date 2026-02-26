@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -20,11 +20,9 @@
     </div>
 
     <script>
-        // *** นำ SHEET_ID ของคุณมาใส่ตรงนี้ (ต้องตรงกับไฟล์ index) ***
-        const sheetId = '1Hn6U3lTv-rAZEjdQWeWoL_jxPlCeVkyCOpAKlBM5Wo0';const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`; 
+        const sheetId = '1Hn6U31Tv-rAZEjdQWeWoL_jxPlCeVkyCOpAKlBM5Wo0'; 
         const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-        // ดึง ID ข่าวจาก URL (เช่น article.html?id=1)
         const urlParams = new URLSearchParams(window.location.search);
         const articleId = urlParams.get('id');
 
@@ -35,9 +33,8 @@
                 const rows = json.table.rows;
                 let found = false;
 
-                // ค้นหาข่าวที่มี ID ตรงกับที่กดเข้ามา
                 rows.forEach((row, index) => {
-                    if (index === 0 || !row.c[0]) return;
+                    if (index === 0 || !row || !row.c || !row.c[0]) return;
                     
                     if (row.c[0].v.toString() === articleId) {
                         found = true;
@@ -46,7 +43,7 @@
                         const content = row.c[4] ? row.c[4].v : 'ไม่มีเนื้อหา';
 
                         document.getElementById('article-content').innerHTML = `
-                            ${imgUrl ? `<img src="${imgUrl}" class="article-img">` : ''}
+                            ${imgUrl ? '<img src="' + imgUrl + '" class="article-img">' : ''}
                             <h1 class="article-title">${title}</h1>
                             <div class="article-body">${content}</div>
                         `;
@@ -56,10 +53,12 @@
                 if (!found) {
                     document.getElementById('article-content').innerHTML = 'ไม่พบเนื้อหาข่าวที่คุณค้นหา';
                 }
+            })
+            .catch(err => {
+                document.getElementById('article-content').innerHTML = 'เกิดข้อผิดพลาดในการโหลดเนื้อหา';
+                console.error(err);
             });
     </script>
 </body>
 </html>
-
-
 
