@@ -1,9 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข่าวสารล่าสุด</title>
+    <title>ข่าวสาร QMIX</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f4f4; margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: auto; }
@@ -22,23 +22,20 @@
     </div>
 
     <script>
-        // *** นำ SHEET_ID ของคุณมาใส่ตรงนี้ ***
-        const sheetId = '1Hn6U3lTv-rAZEjdQWeWoL_jxPlCeVkyCOpAKlBM5Wo0';const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`; 
+        const sheetId = '1Hn6U31Tv-rAZEjdQWeWoL_jxPlCeVkyCOpAKlBM5Wo0'; 
         const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
         fetch(url)
             .then(res => res.text())
             .then(text => {
-                // แปลงข้อมูลที่ได้จาก Google Sheets ให้อยู่ในรูปแบบ JSON
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 const rows = json.table.rows;
                 let html = '';
 
-                // วนลูปสร้างการ์ดข่าว (ข้ามแถวแรกที่เป็นหัวข้อ)
                 rows.forEach((row, index) => {
-                    if (index === 0 || !row.c[0]) return; 
+                    if (index === 0 || !row || !row.c || !row.c[0]) return; 
                     
-                    const id = row.c[0].v;
+                    const id = row.c[0] ? row.c[0].v : '';
                     const title = row.c[1] ? row.c[1].v : 'ไม่มีหัวข้อ';
                     const imgUrl = row.c[2] ? row.c[2].v : 'https://via.placeholder.com/600x300?text=No+Image';
                     const summary = row.c[3] ? row.c[3].v : '';
@@ -54,18 +51,17 @@
                         </div>
                     `;
                 });
-                document.getElementById('news-list').innerHTML = html;
+                
+                if (html === '') {
+                    document.getElementById('news-list').innerHTML = '<p style="text-align:center;">ยังไม่มีข่าวสารในขณะนี้</p>';
+                } else {
+                    document.getElementById('news-list').innerHTML = html;
+                }
             })
             .catch(err => {
-                document.getElementById('news-list').innerHTML = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+                document.getElementById('news-list').innerHTML = 'เกิดข้อผิดพลาด: ไม่สามารถดึงข้อมูลจาก Google Sheets ได้';
                 console.error(err);
             });
     </script>
 </body>
 </html>
-
-
-
-
-
-
